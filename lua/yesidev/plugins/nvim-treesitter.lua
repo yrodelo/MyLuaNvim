@@ -92,7 +92,6 @@ return {
 					"bash",
 					"dockerfile",
 					"gitignore",
-					"go",
 					"html",
 					"json",
 					"lua",

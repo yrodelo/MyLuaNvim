@@ -8,6 +8,7 @@ return {
 					tfvars = "terraform",
 					tfstate = "json",
 					sh = "bash",
+					env = "bash",
 					-- html = "html",
 					html = "htmldjango",
 				},

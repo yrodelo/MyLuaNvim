@@ -77,7 +77,7 @@ return {
 
 		-- hide error on screen
 		vim.diagnostic.config({
-			virtual_text = true,
+			virtual_text = false,
 		})
 
 		-- enable/disable diagnostics
@@ -185,13 +185,13 @@ return {
 			capabilities = capabilities,
 		})
 
-		lspconfig["tsserver"].setup({
+		lspconfig["ts_ls"].setup({
 			capabilities = capabilities,
 		})
 
-		lspconfig["gopls"].setup({
-			capabilities = capabilities,
-		})
+		-- lspconfig["gopls"].setup({
+		-- 	capabilities = capabilities,
+		-- })
 
 		lspconfig["pyright"].setup({
 			capabilities = capabilities,
@@ -222,17 +222,6 @@ return {
 		})
 
 		-- disable diagnostics for tfvars
-		vim.api.nvim_exec(
-			[[
-    augroup disable_tfvars_diagnostic
-        autocmd!
-        autocmd BufEnter *.tfvars lua vim.diagnostic.disable()
-        autocmd BufEnter *.tf lua vim.diagnostic.enable()
-    augroup END
-      ]],
-			false
-		)
-
 		local ng = require("ng")
 
 		opts.desc = "Go to template for component"

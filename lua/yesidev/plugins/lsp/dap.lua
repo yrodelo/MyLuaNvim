@@ -4,7 +4,7 @@ return {
 		"rcarriga/nvim-dap-ui",
 		"theHamsta/nvim-dap-virtual-text",
 		"nvim-neotest/nvim-nio",
-		"leoluz/nvim-dap-go",
+		-- "leoluz/nvim-dap-go",
 	},
 	event = { "BufReadPre", "BufNewFile" },
 	config = function()
@@ -92,7 +92,7 @@ return {
 				max_value_lines = 100,
 			},
 		})
-		require("dap-go").setup()
+		-- require("dap-go").setup()
 		require("nvim-dap-virtual-text").setup()
 
 		vim.fn.sign_define(

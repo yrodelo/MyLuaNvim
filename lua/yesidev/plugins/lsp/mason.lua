@@ -28,8 +28,8 @@ return {
 				"lua_ls",
 				"pyright",
 				"terraformls",
-				"tsserver",
-				"gopls",
+				"ts_ls",
+				-- "gopls",
 
 				-- frameworks
 				"angularls",

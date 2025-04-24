@@ -1,23 +1,21 @@
 return {
 	{
 		"CopilotC-Nvim/CopilotChat.nvim",
-		branch = "canary",
+		branch = "main",
 		event = { "BufWinEnter" },
 		dependencies = {
 			{ "nvim-telescope/telescope.nvim" },
 		},
 		opts = {
 			-- See Configuration section for rest
-			show_help = false,
+			-- show_help = false,
 		},
 		keys = {
 			-- Show help actions with telescope
 			-- Quick chat with Copilot
 			{
 				"<leader>ccq",
-				function()
-					require("CopilotChat").ask("", { selection = require("CopilotChat.select").buffer })
-				end,
+				":CopilotChatOpen<cr>",
 				desc = "CopilotChat - Toggle",
 			},
 			-- Quick chat with Copilot using visual selection

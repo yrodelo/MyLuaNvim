@@ -2,7 +2,7 @@ local set = vim.opt
 
 -- line numbers
 set.number = true
-set.relativenumber = true
+set.relativenumber = false
 
 -- tabs & indentation
 set.tabstop = 2

@@ -21,13 +21,13 @@ return {
 				"black", -- python formatter
 				"mypy", -- python linter
 				"shfmt", -- bash formatter
-				"gofumpt", -- go formatter
-				"golines", -- go formatter
-				"goimports", -- go imports formatter
+				-- "gofumpt", -- go formatter
+				-- "golines", -- go formatter
+				-- "goimports", -- go imports formatter
 
 				-- debbugers
-				"delve",
-				"bashdb",
+				-- "delve",
+				-- "bashdb",
 
 				-- Deprecated LSPs in none-ls
 				"eslint_d", -- js linter
