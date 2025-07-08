@@ -19,6 +19,7 @@ return {
 			-- list of servers for mason to install
 			ensure_installed = {
 				-- languages
+				"yamlls",
 				"azure_pipelines_ls",
 				"bashls",
 				"cssls",
