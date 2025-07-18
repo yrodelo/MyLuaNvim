@@ -143,10 +143,6 @@ return {
 			},
 		})
 
-		lspconfig["yamlls"].setup({
-			capabilities = capabilities,
-		})
-
 		-- disable virtual text for azure pipelines
 		vim.api.nvim_exec(
 			[[
