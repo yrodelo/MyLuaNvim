@@ -132,7 +132,8 @@ return {
 						},
 						["https://raw.githubusercontent.com/microsoft/azure-pipelines-vscode/main/service-schema.json"] = {
 							"/azure-pipeline*.y*l",
-							"/build.y*l",
+							"**/build.y*l",
+							"master-extends.y*l",
 						},
 					},
 				},
