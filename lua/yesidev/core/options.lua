@@ -58,4 +58,4 @@ set.spelllang = "en_us,es"
 set.spell = true
 
 -- own global variables
-vim.g.auto_format = 1
+vim.g.auto_format = 0
