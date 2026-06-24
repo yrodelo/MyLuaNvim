@@ -13,6 +13,10 @@
       {
         "language": "go",
         "path": "./go/go.json"
+      },
+      {
+        "language": "yaml",
+        "path": "./crossplane/yaml.json"
       }
     ]
   }

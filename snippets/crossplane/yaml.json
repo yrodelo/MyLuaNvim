@@ -1,0 +1,352 @@
+{
+  "Crossplane Provider": {
+    "prefix": "xp-provider",
+    "body": [
+      "apiVersion: pkg.crossplane.io/v1",
+      "kind: Provider",
+      "metadata:",
+      "  name: ${1:provider-name}",
+      "spec:",
+      "  package: ${2:xpkg.upbound.io/upbound/provider-aws-s3:v1.0.0}",
+      "  controllerConfigRef:",
+      "    name: ${3:default}"
+    ],
+    "description": "Crossplane Provider package"
+  },
+  "Crossplane Configuration": {
+    "prefix": "xp-configuration",
+    "body": [
+      "apiVersion: pkg.crossplane.io/v1",
+      "kind: Configuration",
+      "metadata:",
+      "  name: ${1:platform-config}",
+      "spec:",
+      "  package: ${2:xpkg.upbound.io/my-org/platform-config:v0.1.0}"
+    ],
+    "description": "Crossplane Configuration package"
+  },
+  "Crossplane ProviderConfig AWS": {
+    "prefix": "xp-providerconfig-aws",
+    "body": [
+      "apiVersion: aws.upbound.io/v1beta1",
+      "kind: ProviderConfig",
+      "metadata:",
+      "  name: ${1:default}",
+      "spec:",
+      "  credentials:",
+      "    source: ${2|Secret,IRSA,WebIdentity|}",
+      "    secretRef:",
+      "      namespace: ${3:crossplane-system}",
+      "      name: ${4:aws-creds}",
+      "      key: ${5:credentials}"
+    ],
+    "description": "AWS ProviderConfig with credentials"
+  },
+  "Crossplane ProviderConfig GCP": {
+    "prefix": "xp-providerconfig-gcp",
+    "body": [
+      "apiVersion: gcp.upbound.io/v1beta1",
+      "kind: ProviderConfig",
+      "metadata:",
+      "  name: ${1:default}",
+      "spec:",
+      "  projectID: ${2:my-gcp-project}",
+      "  credentials:",
+      "    source: Secret",
+      "    secretRef:",
+      "      namespace: ${3:crossplane-system}",
+      "      name: ${4:gcp-creds}",
+      "      key: ${5:credentials.json}"
+    ],
+    "description": "GCP ProviderConfig with credentials"
+  },
+  "Crossplane Composition": {
+    "prefix": "xp-composition",
+    "body": [
+      "apiVersion: apiextensions.crossplane.io/v1",
+      "kind: Composition",
+      "metadata:",
+      "  name: ${1:composition-name}",
+      "  labels:",
+      "    provider: ${2:aws}",
+      "spec:",
+      "  compositeTypeRef:",
+      "    apiVersion: ${3:custom.example.org/v1alpha1}",
+      "    kind: ${4:XResource}",
+      "  mode: ${5|Pipeline,Resources|}",
+      "  pipeline:",
+      "    - step: ${6:patch-and-transform}",
+      "      functionRef:",
+      "        name: ${7:crossplane-contrib-function-patch-and-transform}",
+      "      input:",
+      "        apiVersion: pt.fn.crossplane.io/v1beta1",
+      "        kind: Resources",
+      "        resources:",
+      "          - name: ${8:resource-name}",
+      "            base:",
+      "              apiVersion: ${9:s3.aws.upbound.io/v1beta1}",
+      "              kind: ${10:Bucket}",
+      "              spec:",
+      "                forProvider:",
+      "                  region: ${11:us-east-1}",
+      "                  $0"
+    ],
+    "description": "Crossplane Composition with Pipeline mode"
+  },
+  "Crossplane Composition Resources mode": {
+    "prefix": "xp-composition-resources",
+    "body": [
+      "apiVersion: apiextensions.crossplane.io/v1",
+      "kind: Composition",
+      "metadata:",
+      "  name: ${1:composition-name}",
+      "  labels:",
+      "    provider: ${2:aws}",
+      "spec:",
+      "  compositeTypeRef:",
+      "    apiVersion: ${3:custom.example.org/v1alpha1}",
+      "    kind: ${4:XResource}",
+      "  mode: Resources",
+      "  resources:",
+      "    - name: ${5:resource-name}",
+      "      base:",
+      "        apiVersion: ${6:s3.aws.upbound.io/v1beta1}",
+      "        kind: ${7:Bucket}",
+      "        spec:",
+      "          forProvider:",
+      "            region: ${8:us-east-1}",
+      "            $0",
+      "      patches:",
+      "        - type: FromCompositeFieldPath",
+      "          fromFieldPath: ${9:spec.parameters.region}",
+      "          toFieldPath: ${10:spec.forProvider.region}"
+    ],
+    "description": "Crossplane Composition with Resources mode (legacy)"
+  },
+  "Crossplane CompositeResourceDefinition (XRD)": {
+    "prefix": "xp-xrd",
+    "body": [
+      "apiVersion: apiextensions.crossplane.io/v1",
+      "kind: CompositeResourceDefinition",
+      "metadata:",
+      "  name: ${1:xresources.custom.example.org}",
+      "spec:",
+      "  group: ${2:custom.example.org}",
+      "  names:",
+      "    kind: ${3:XResource}",
+      "    plural: ${4:xresources}",
+      "  claimNames:",
+      "    kind: ${5:Resource}",
+      "    plural: ${6:resources}",
+      "  versions:",
+      "    - name: ${7:v1alpha1}",
+      "      served: true",
+      "      referenceable: true",
+      "      schema:",
+      "        openAPIV3Schema:",
+      "          type: object",
+      "          properties:",
+      "            spec:",
+      "              type: object",
+      "              properties:",
+      "                parameters:",
+      "                  type: object",
+      "                  properties:",
+      "                    ${8:region}:",
+      "                      type: ${9:string}",
+      "                      description: ${10:Region for the resource}",
+      "                  required:",
+      "                    - ${8:region}"
+    ],
+    "description": "Crossplane XRD (CompositeResourceDefinition)"
+  },
+  "Crossplane Claim": {
+    "prefix": "xp-claim",
+    "body": [
+      "apiVersion: ${1:custom.example.org/v1alpha1}",
+      "kind: ${2:Resource}",
+      "metadata:",
+      "  name: ${3:my-resource}",
+      "  namespace: ${4:default}",
+      "spec:",
+      "  parameters:",
+      "    ${5:region}: ${6:us-east-1}",
+      "  compositionSelector:",
+      "    matchLabels:",
+      "      provider: ${7:aws}"
+    ],
+    "description": "Crossplane Claim (namespaced XR)"
+  },
+  "Crossplane CompositeResource (XR)": {
+    "prefix": "xp-xr",
+    "body": [
+      "apiVersion: ${1:custom.example.org/v1alpha1}",
+      "kind: ${2:XResource}",
+      "metadata:",
+      "  name: ${3:my-xresource}",
+      "spec:",
+      "  parameters:",
+      "    ${4:region}: ${5:us-east-1}",
+      "  compositionSelector:",
+      "    matchLabels:",
+      "      provider: ${6:aws}"
+    ],
+    "description": "Crossplane Composite Resource (cluster-scoped)"
+  },
+  "Crossplane Function": {
+    "prefix": "xp-function",
+    "body": [
+      "apiVersion: pkg.crossplane.io/v1beta1",
+      "kind: Function",
+      "metadata:",
+      "  name: ${1:function-patch-and-transform}",
+      "spec:",
+      "  package: ${2:xpkg.upbound.io/crossplane-contrib/function-patch-and-transform:v0.7.0}"
+    ],
+    "description": "Crossplane Function package"
+  },
+  "Crossplane EnvironmentConfig": {
+    "prefix": "xp-envconfig",
+    "body": [
+      "apiVersion: apiextensions.crossplane.io/v1alpha1",
+      "kind: EnvironmentConfig",
+      "metadata:",
+      "  name: ${1:env-config}",
+      "data:",
+      "  ${2:key}: ${3:value}"
+    ],
+    "description": "Crossplane EnvironmentConfig"
+  },
+  "Crossplane DeploymentRuntimeConfig": {
+    "prefix": "xp-runtimeconfig",
+    "body": [
+      "apiVersion: pkg.crossplane.io/v1beta1",
+      "kind: DeploymentRuntimeConfig",
+      "metadata:",
+      "  name: ${1:default}",
+      "spec:",
+      "  deploymentTemplate:",
+      "    spec:",
+      "      selector: {}",
+      "      template:",
+      "        spec:",
+      "          serviceAccountName: ${2:provider-sa}",
+      "          containers:",
+      "            - name: package-runtime",
+      "              args:",
+      "                - --debug"
+    ],
+    "description": "Crossplane DeploymentRuntimeConfig (replaces ControllerConfig)"
+  },
+  "Crossplane Patch FromComposite": {
+    "prefix": "xp-patch-from",
+    "body": [
+      "- type: FromCompositeFieldPath",
+      "  fromFieldPath: ${1:spec.parameters.region}",
+      "  toFieldPath: ${2:spec.forProvider.region}",
+      "  transforms:",
+      "    - type: ${3|string,math,map,match,convert|}",
+      "      ${3:string}:",
+      "        type: ${4|Format,Convert,TrimPrefix,TrimSuffix,Regexp|}",
+      "        fmt: \"${5:%s-suffix}\""
+    ],
+    "description": "Patch FromCompositeFieldPath with transform"
+  },
+  "Crossplane Patch ToComposite": {
+    "prefix": "xp-patch-to",
+    "body": [
+      "- type: ToCompositeFieldPath",
+      "  fromFieldPath: ${1:status.atProvider.arn}",
+      "  toFieldPath: ${2:status.resourceArn}"
+    ],
+    "description": "Patch ToCompositeFieldPath (status back to XR)"
+  },
+  "Crossplane Patch CombineFromComposite": {
+    "prefix": "xp-patch-combine",
+    "body": [
+      "- type: CombineFromComposite",
+      "  combine:",
+      "    variables:",
+      "      - fromFieldPath: ${1:spec.parameters.name}",
+      "      - fromFieldPath: ${2:spec.parameters.env}",
+      "    strategy: string",
+      "    string:",
+      "      fmt: \"${3:%s-%s}\"",
+      "  toFieldPath: ${4:metadata.name}"
+    ],
+    "description": "Patch CombineFromComposite"
+  },
+  "Crossplane Usage": {
+    "prefix": "xp-usage",
+    "body": [
+      "apiVersion: apiextensions.crossplane.io/v1alpha1",
+      "kind: Usage",
+      "metadata:",
+      "  name: ${1:usage-name}",
+      "spec:",
+      "  of:",
+      "    apiVersion: ${2:s3.aws.upbound.io/v1beta1}",
+      "    kind: ${3:Bucket}",
+      "    resourceRef:",
+      "      name: ${4:my-bucket}",
+      "  by:",
+      "    apiVersion: ${5:custom.example.org/v1alpha1}",
+      "    kind: ${6:XResource}",
+      "    resourceRef:",
+      "      name: ${7:my-xresource}"
+    ],
+    "description": "Crossplane Usage (dependency/protection)"
+  },
+  "Crossplane StoreConfig": {
+    "prefix": "xp-storeconfig",
+    "body": [
+      "apiVersion: secrets.crossplane.io/v1alpha1",
+      "kind: StoreConfig",
+      "metadata:",
+      "  name: ${1:default}",
+      "spec:",
+      "  type: ${2|Kubernetes,Vault|}",
+      "  defaultScope: ${3:crossplane-system}",
+      "  kubernetes:",
+      "    auth:",
+      "      source: ServiceAccount"
+    ],
+    "description": "Crossplane StoreConfig for external secrets"
+  },
+  "Crossplane Pipeline Step": {
+    "prefix": "xp-pipeline-step",
+    "body": [
+      "- step: ${1:step-name}",
+      "  functionRef:",
+      "    name: ${2:crossplane-contrib-function-patch-and-transform}",
+      "  input:",
+      "    apiVersion: ${3:pt.fn.crossplane.io/v1beta1}",
+      "    kind: ${4:Resources}",
+      "    resources:",
+      "      - name: ${5:resource}",
+      "        base:",
+      "          apiVersion: ${6:apiVersion}",
+      "          kind: ${7:Kind}",
+      "          spec:",
+      "            forProvider:",
+      "              $0"
+    ],
+    "description": "Pipeline step for Composition"
+  },
+  "Crossplane MR (Managed Resource)": {
+    "prefix": "xp-managed",
+    "body": [
+      "apiVersion: ${1:s3.aws.upbound.io/v1beta1}",
+      "kind: ${2:Bucket}",
+      "metadata:",
+      "  name: ${3:my-bucket}",
+      "spec:",
+      "  forProvider:",
+      "    region: ${4:us-east-1}",
+      "    ${0}",
+      "  providerConfigRef:",
+      "    name: ${5:default}"
+    ],
+    "description": "Crossplane Managed Resource (MR)"
+  }
+}
