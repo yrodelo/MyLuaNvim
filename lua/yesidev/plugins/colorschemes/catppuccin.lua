@@ -43,7 +43,7 @@ return {
 					nvimtree = true,
 					treesitter = true,
 					alpha = true,
-					ts_rainbow2 = true,
+					rainbow_delimiters = true,
 					mason = true,
 					which_key = true,
 					telescope = {

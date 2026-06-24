@@ -82,7 +82,6 @@ return {
 
 			-- sources for autocompletion
 			sources = cmp.config.sources({
-				{ name = "copilot" },
 				{ name = "nvim_lsp" }, -- lsp
 				{ name = "luasnip" }, -- snippets
 				{ name = "buffer" }, -- text within current buffer
@@ -133,7 +132,6 @@ return {
 						Calendar = "",
 						Watch = "󰥔",
 						Package = "",
-						Copilot = "",
 						Codeium = "",
 						TabNine = "",
 					},

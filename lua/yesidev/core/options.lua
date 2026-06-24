@@ -22,7 +22,7 @@ set.termguicolors = true
 set.background = "dark"
 set.signcolumn = "yes"
 
--- for copilot chat
+-- global statusline / split behavior
 set.laststatus = 3
 set.splitkeep = "screen"
 
