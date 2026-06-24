@@ -68,9 +68,10 @@ return {
 					extra_args = { "--line-length", "80" },
 				}), -- python formatter
 				formatting.shfmt,
-				formatting.gofumpt,
-				formatting.goimports,
-				formatting.golines,
+				-- formateadores de Go (deshabilitados, como el resto de la config de Go)
+				-- formatting.gofumpt,
+				-- formatting.goimports,
+				-- formatting.golines,
 
 				-- linters
 				require("none-ls.diagnostics.ruff"),
@@ -83,7 +84,7 @@ return {
 
 			-- configure format on save
 			on_attach = function(current_client, bufnr)
-				if current_client.supports_method("textDocument/formatting") then
+				if current_client:supports_method("textDocument/formatting") then
 					vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
 					vim.api.nvim_create_autocmd("BufWritePre", {
 						group = augroup,

@@ -47,7 +47,7 @@ return {
 		end
 
 		local function normalize_cwd()
-			return normalize_path(vim.loop.cwd()) .. "/"
+			return normalize_path((vim.uv or vim.loop).cwd()) .. "/"
 		end
 
 		local function is_subdirectory(cwd, path)

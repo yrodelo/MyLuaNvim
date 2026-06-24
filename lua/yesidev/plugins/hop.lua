@@ -1,6 +1,7 @@
 return {
-	"phaazon/hop.nvim",
+	"smoka7/hop.nvim",
 	event = { "BufReadPre", "BufNewFile" },
+	version = "*",
 	config = function()
 		-- import hop plugin
 		local hop = require("hop")

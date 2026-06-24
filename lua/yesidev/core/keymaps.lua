@@ -34,10 +34,10 @@ nmap("<ESC>", "<cmd>noh<CR>")
 nmap("<CR>", "o<Esc>")
 
 -- tmux navigator
-nmap("<C-h>", "<cmd>tmuxNavigateLeft<CR>", "window left")
-nmap("<C-j>", "<cmd>tmuxNavigateDown<CR>", "window down")
-nmap("<C-k>", "<cmd>tmuxNavigateUp<CR>", "window up")
-nmap("<C-l>", "<cmd>tmuxNavigateRight<CR>", "window right")
+nmap("<C-h>", "<cmd>TmuxNavigateLeft<CR>", "window left")
+nmap("<C-j>", "<cmd>TmuxNavigateDown<CR>", "window down")
+nmap("<C-k>", "<cmd>TmuxNavigateUp<CR>", "window up")
+nmap("<C-l>", "<cmd>TmuxNavigateRight<CR>", "window right")
 
 -- begin and end of line
 noremap("<leader>h", "^", "begin of line")

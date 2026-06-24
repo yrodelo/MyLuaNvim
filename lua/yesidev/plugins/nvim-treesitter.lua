@@ -1,16 +1,22 @@
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
+		-- La rama master queda congelada pero mantiene el sistema de módulos
+		-- (textobjects, indent, ensure_installed...). La rama main es una
+		-- reescritura incompatible que no soporta lazy-loading ni módulos.
+		branch = "master",
 		event = { "BufReadPre", "BufNewFile" },
 		build = ":TSUpdate",
 		dependencies = {
 			"windwp/nvim-ts-autotag",
-			"HiPhish/nvim-ts-rainbow2",
-			"nvim-treesitter/nvim-treesitter-textobjects",
+			{ "nvim-treesitter/nvim-treesitter-textobjects", branch = "master" },
 		},
 		config = function()
 			-- import nvim-treesitter plugin
 			local treesitter = require("nvim-treesitter.configs")
+
+			-- autotag ahora se configura directamente (ya no vía nvim-treesitter.configs)
+			require("nvim-ts-autotag").setup()
 
 			-- configure treesitter
 			treesitter.setup({ -- enable syntax highlighting
@@ -85,8 +91,6 @@ return {
 				},
 				-- enable indentation
 				indent = { enable = true },
-				-- enable autotagging (w/ nvim-ts-autotag plugin)
-				autotag = { enable = true },
 				-- ensure these language parsers are installed
 				ensure_installed = {
 					"bash",
@@ -101,23 +105,8 @@ return {
 					"vim",
 					"yaml",
 				},
-				-- enable nvim-ts-context-commentstring plugin for commenting tsx and jsx
-				context_commentstring = {
-					enable = true,
-					enable_autocmd = false,
-				},
 				-- auto install above language parsers
-				auto_install = true, -- enable nvim-ts-rainbow plugin
-
-				rainbow = {
-					enable = false,
-					-- list of languages you want to disable the plugin for
-					disable = { "jsx", "cpp", "html" },
-					-- Which query to use for finding delimiters
-					-- query = "rainbow-parens",
-					-- Highlight the entire buffer all at once
-					-- strategy = require("ts-rainbow").strategy.global,
-				},
+				auto_install = true,
 			})
 		end,
 	},

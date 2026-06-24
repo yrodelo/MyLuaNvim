@@ -7,19 +7,27 @@ return {
 		"joeveiga/ng.nvim",
 	},
 	config = function()
-		-- import lspconfig plugin
-		local lspconfig = require("lspconfig")
-
 		-- import cmp-nvim-lsp plugin
 		local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
 		-- used to enable autocompletion (assign to every lsp server config)
 		local capabilities = cmp_nvim_lsp.default_capabilities()
 
-		-- ## CONFIGURACIÓN DE LUA_LS (MOVIDA AL PRINCIPIO) ##
-		-- Configura el servidor de Lua primero para que reconozca el global 'vim' en este archivo.
-		lspconfig["lua_ls"].setup({
+		-- ## API nativa de Neovim 0.11+ ##
+		-- En lugar de require("lspconfig").<server>.setup(), ahora se usa
+		-- vim.lsp.config() para definir/extender configuraciones y
+		-- vim.lsp.enable() para activarlas. nvim-lspconfig sólo aporta las
+		-- definiciones base en runtimepath (lsp/<server>.lua).
+
+		-- Aplica las capabilities de cmp a TODOS los servidores.
+		vim.lsp.config("*", {
 			capabilities = capabilities,
+		})
+
+		-- ## Overrides por servidor ##
+
+		-- lua_ls: reconoce el global `vim` y la librería de runtime de Neovim.
+		vim.lsp.config("lua_ls", {
 			settings = {
 				Lua = {
 					diagnostics = {
@@ -35,8 +43,36 @@ return {
 			},
 		})
 
-		-- El resto de la configuración
+		-- azure_pipelines_ls: fuerza el root al cwd y define los schemas.
+		vim.lsp.config("azure_pipelines_ls", {
+			root_dir = function(_, on_dir)
+				on_dir(vim.fn.getcwd())
+			end,
+			settings = {
+				yaml = {
+					schemas = {
+						["https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json"] = {
+							".github/**/*.y*l",
+						},
+						["https://raw.githubusercontent.com/microsoft/azure-pipelines-vscode/main/service-schema.json"] = {
+							"/azure-pipeline*.y*l",
+							"**/build.y*l",
+							"master-extends.y*l",
+						},
+					},
+				},
+				format = {
+					enable = true,
+				},
+			},
+		})
+
+		-- Los servidores se instalan vía mason-lspconfig (ensure_installed) y se
+		-- activan automáticamente con su opción automatic_enable (ver mason.lua).
+
+		-- inc-rename
 		require("inc_rename").setup()
+
 		local keymap = vim.keymap
 		local opts = { noremap = true, silent = true }
 
@@ -69,10 +105,14 @@ return {
 		keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts)
 
 		opts.desc = "Go to previous diagnostic"
-		keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+		keymap.set("n", "[d", function()
+			vim.diagnostic.jump({ count = -1, float = true })
+		end, opts)
 
 		opts.desc = "Go to next diagnostic"
-		keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+		keymap.set("n", "]d", function()
+			vim.diagnostic.jump({ count = 1, float = true })
+		end, opts)
 
 		opts.desc = "Show documentation for what is under cursor"
 		keymap.set("n", "K", vim.lsp.buf.hover, opts)
@@ -81,118 +121,37 @@ return {
 		keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)
 
 		opts.desc = "show diagnostic"
-		keymap.set("n", "gl", "<cmd>lua vim.diagnostic.open_float()<CR>", opts)
+		keymap.set("n", "gl", vim.diagnostic.open_float, opts)
 
 		-- Configura los diagnósticos y define los iconos
 		vim.diagnostic.config({
 			virtual_text = false,
 			signs = {
 				text = {
-					[vim.diagnostic.severity.ERROR] = " ",
-					[vim.diagnostic.severity.WARN] = " ",
+					[vim.diagnostic.severity.ERROR] = " ",
+					[vim.diagnostic.severity.WARN] = " ",
 					[vim.diagnostic.severity.HINT] = "󰠠 ",
-					[vim.diagnostic.severity.INFO] = " ",
+					[vim.diagnostic.severity.INFO] = " ",
 				},
 			},
 		})
 
-		-- enable/disable diagnostics
-		vim.g.diagnostic_enabled = true
-
-		vim.api.nvim_exec(
-			[[
-    function! ToggleDiagnostic()
-        if g:diagnostic_enabled
-            lua vim.diagnostic.disable()
-        else
-            lua vim.diagnostic.enable()
-        endif
-        let g:diagnostic_enabled = !g:diagnostic_enabled
-    endfunction
-    ]],
-			false
-		)
-
-		-- shortcut
+		-- enable/disable diagnostics (API nativa 0.11+: enable recibe un booleano)
 		opts.desc = "Enable/disable diagnostics"
-		vim.keymap.set("n", "<leader>ad", "<cmd>:call ToggleDiagnostic()<CR>", opts)
+		vim.keymap.set("n", "<leader>ad", function()
+			vim.diagnostic.enable(not vim.diagnostic.is_enabled())
+		end, opts)
 
-		--## LSP Servers ##--
-
-		lspconfig["azure_pipelines_ls"].setup({
-			capabilities = capabilities,
-			root_dir = function()
-				return vim.fn.getcwd()
+		-- disable virtual text for yaml/azure pipelines buffers
+		vim.api.nvim_create_autocmd("BufEnter", {
+			group = vim.api.nvim_create_augroup("azure_pipelines_config", { clear = true }),
+			pattern = { "*.yml", "*.yaml" },
+			callback = function()
+				vim.diagnostic.config({ virtual_text = false })
 			end,
-			settings = {
-				yaml = {
-					schemas = {
-						["https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json"] = {
-							".github/**/*.y*l",
-						},
-						["https://raw.githubusercontent.com/microsoft/azure-pipelines-vscode/main/service-schema.json"] = {
-							"/azure-pipeline*.y*l",
-							"**/build.y*l",
-							"master-extends.y*l",
-						},
-					},
-				},
-				format = {
-					enable = true,
-				},
-			},
 		})
 
-		-- disable virtual text for azure pipelines
-		vim.api.nvim_exec(
-			[[
-    augroup azure_pipelines_config
-        autocmd!
-        autocmd BufEnter *.y*ml lua vim.diagnostic.config({ virtual_text = false })
-      ]],
-			false
-		)
-
-		lspconfig["bashls"].setup({
-			capabilities = capabilities,
-		})
-
-		lspconfig["jsonls"].setup({
-			capabilities = capabilities,
-		})
-
-		lspconfig["ts_ls"].setup({
-			capabilities = capabilities,
-		})
-
-		lspconfig["pyright"].setup({
-			capabilities = capabilities,
-		})
-
-		lspconfig["html"].setup({
-			capabilities = capabilities,
-		})
-
-		lspconfig["emmet_ls"].setup({
-			capabilities = capabilities,
-		})
-
-		lspconfig["cssls"].setup({
-			capabilities = capabilities,
-		})
-
-		lspconfig["tailwindcss"].setup({
-			capabilities = capabilities,
-		})
-
-		lspconfig["angularls"].setup({
-			capabilities = capabilities,
-		})
-
-		lspconfig["terraformls"].setup({
-			capabilities = capabilities,
-		})
-
+		-- ng.nvim (Angular helpers)
 		local ng = require("ng")
 
 		opts.desc = "Go to template for component"
