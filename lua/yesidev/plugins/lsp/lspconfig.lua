@@ -43,7 +43,9 @@ return {
 			},
 		})
 
-		-- azure_pipelines_ls: fuerza el root al cwd y define los schemas.
+		-- azure_pipelines_ls: fuerza el root al cwd y asocia el schema de Azure
+		-- Pipelines a los archivos de pipeline más habituales. Sin esta asociación
+		-- el servidor solo da intellisense en archivos llamados "azure-pipelines.yml".
 		vim.lsp.config("azure_pipelines_ls", {
 			root_dir = function(_, on_dir)
 				on_dir(vim.fn.getcwd())
@@ -51,13 +53,22 @@ return {
 			settings = {
 				yaml = {
 					schemas = {
-						["https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json"] = {
-							".github/**/*.y*l",
-						},
+						-- Schema oficial de Azure Pipelines (lo usa la extensión de VS Code).
+						-- "**/" => coincide a cualquier profundidad; ".y*l" => .yml y .yaml.
 						["https://raw.githubusercontent.com/microsoft/azure-pipelines-vscode/main/service-schema.json"] = {
-							"/azure-pipeline*.y*l",
-							"**/build.y*l",
-							"master-extends.y*l",
+							"**/azure-pipeline*.y*l", -- azure-pipelines.yml, azure-pipeline.yaml...
+							"**/*.azure-pipeline*.y*l", -- ci.azure-pipelines.yml...
+							"**/azure-pipelines/**/*.y*l", -- carpeta azure-pipelines/
+							"**/.azure-pipelines/**/*.y*l",
+							"**/.azuredevops/**/*.y*l",
+							"**/pipelines/**/*.y*l", -- carpeta pipelines/
+							"**/.pipelines/**/*.y*l",
+							"**/*-pipeline*.y*l", -- build-pipeline.yml, release-pipeline.yaml...
+							"**/*-pipelines.y*l",
+						},
+						-- GitHub Actions (yaml-language-server, mismo motor).
+						["https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json"] = {
+							"**/.github/workflows/*.y*l",
 						},
 					},
 				},
