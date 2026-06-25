@@ -23,6 +23,8 @@ return {
 				"azure_pipelines_ls",
 				"bashls",
 				"cssls",
+				"dockerls",
+				"docker_compose_language_service",
 				"emmet_ls",
 				"html",
 				"jsonls",

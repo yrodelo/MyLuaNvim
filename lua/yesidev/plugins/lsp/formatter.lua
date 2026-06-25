@@ -21,6 +21,7 @@ return {
 				"black", -- python formatter
 				"mypy", -- python linter
 				"shfmt", -- bash formatter
+				"hadolint", -- dockerfile linter
 				-- "gofumpt", -- go formatter
 				-- "golines", -- go formatter
 				-- "goimports", -- go imports formatter
@@ -74,6 +75,7 @@ return {
 				-- formatting.golines,
 
 				-- linters
+				diagnostics.hadolint, -- dockerfile linter
 				require("none-ls.diagnostics.ruff"),
 				require("none-ls.diagnostics.eslint_d").with({ -- js/ts linter
 					condition = function(utils)
